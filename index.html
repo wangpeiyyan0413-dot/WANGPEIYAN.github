@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teachable Machine with TensorFlow.js</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .video-container {
+            position: relative;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        #webcam {
+            width: 100%;
+            max-width: 500px;
+            display: block;
+            border-radius: 8px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #start {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        #start:hover {
+            background-color: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        #stop {
+            background-color: #f56565;
+            color: white;
+        }
+        
+        #stop:hover {
+            background-color: #e53e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+        }
+        
+        .results-container {
+            background-color: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #333;
+            text-align: left;
+        }
+        
+        .result-probability {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .status.loading {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status.ready {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status.error {
+            background-color: #fee2e2;
+            color: #7f1d1d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 Teachable Machine</h1>
+        <p class="subtitle">TensorFlow.js 图像分类演示</p>
+        
+        <div id="status" class="status loading">正在加载模型...</div>
+        
+        <div class="video-container">
+            <video id="webcam"></video>
+        </div>
+        
+        <div class="button-group">
+            <button id="start">启动摄像头</button>
+            <button id="stop">停止摄像头</button>
+        </div>
+        
+        <div id="results" class="results-container">
+            <div id="resultDiv"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8"></script>
+    
+    <script>
+        // 模型 URL
+        const URL = "https://teachablemachine.withgoogle.com/models/sTBoNGgmv/";
+        
+        let model, webcam, labelContainer, maxPredictions;
+        
+        // 初始化
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+            
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+            
+            const flip = true;
+            webcam = new tmImage.Webcam(500, 500, flip);
+            
+            labelContainer = document.getElementById("resultDiv");
+            labelContainer.innerHTML = "";
+            
+            for (let i = 0; i < maxPredictions; i++) {
+                const div = document.createElement("div");
+                div.className = "result-item";
+                div.innerHTML = `
+                    <span class="result-label">${model.getClassLabels()[i]}</span>
+                    <span class="result-probability" id="label-${i}">0%</span>
+                `;
+                labelContainer.appendChild(div);
+            }
+            
+            updateStatus("模型加载成功！", "ready");
+        }
+        
+        // 启动摄像头
+        document.getElementById("start").addEventListener("click", async () => {
+            await webcam.setup();
+            document.getElementById("webcam").appendChild(webcam.canvas);
+            document.getElementById("start").disabled = true;
+            updateStatus("摄像头已启动，开始检测...", "ready");
+            loop();
+        });
+        
+        // 停止摄像头
+        document.getElementById("stop").addEventListener("click", () => {
+            webcam.stop();
+            document.getElementById("webcam").innerHTML = "";
+            document.getElementById("start").disabled = false;
+            updateStatus("摄像头已停止", "ready");
+        });
+        
+        // 主循环
+        async function loop() {
+            webcam.update();
+            await predict();
+            if (document.getElementById("webcam").children.length > 0) {
+                window.requestAnimationFrame(loop);
+            }
+        }
+        
+        // 预测
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            
+            for (let i = 0; i < maxPredictions; i++) {
+                const probability = (prediction[i].probability * 100).toFixed(2);
+                document.getElementById("label-" + i).innerText = probability + "%";
+            }
+        }
+        
+        // 更新状态
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerText = message;
+            statusDiv.className = "status " + type;
+        }
+        
+        // 页面加载时初始化
+        window.addEventListener("load", () => {
+            init().catch((error) => {
+                updateStatus("模型加载失败: " + error.message, "error");
+                console.error(error);
+            });
+        });
+    </script>
+</body>
+</html>
