@@ -1,270 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teachable Machine with TensorFlow.js</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        .video-container {
-            position: relative;
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        
-        #webcam {
-            width: 100%;
-            max-width: 500px;
-            display: block;
-            border-radius: 8px;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        button {
-            flex: 1;
-            min-width: 120px;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        #start {
-            background-color: #667eea;
-            color: white;
-        }
-        
-        #start:hover {
-            background-color: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        #stop {
-            background-color: #f56565;
-            color: white;
-        }
-        
-        #stop:hover {
-            background-color: #e53e3e;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
-        }
-        
-        .results-container {
-            background-color: #f9fafb;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .result-item:last-child {
-            border-bottom: none;
-        }
-        
-        .result-label {
-            font-weight: 600;
-            color: #333;
-            text-align: left;
-        }
-        
-        .result-probability {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .status {
-            text-align: center;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-        
-        .status.loading {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        
-        .status.ready {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-        
-        .status.error {
-            background-color: #fee2e2;
-            color: #7f1d1d;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who are you without labels?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=final-text-style">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  <script src="js/sketch.js?v=phase-one-actions" defer></script>
 </head>
 <body>
-    <div class="container">
-        <h1>🎥 Teachable Machine</h1>
-        <p class="subtitle">TensorFlow.js 图像分类演示</p>
-        
-        <div id="status" class="status loading">正在加载模型...</div>
-        
-        <div class="video-container">
-            <video id="webcam"></video>
+  <header class="page-header">
+    <h1>Who are you without labels?</h1>
+  </header>
+  <section id="entry-screen" class="entry-screen">
+    <div class="label-background" aria-hidden="true">
+      <span class="label-chip near" style="--x: 8%; --y: 12%; --tx: 58px; --ty: 42px; --s: 1.08; --delay: -2s; --duration: 18s;">[ HUMAN SUBJECT ]</span>
+      <span class="label-chip far" style="--x: 28%; --y: 8%; --tx: 36px; --ty: 64px; --s: 0.82; --delay: -8s; --duration: 24s;">[ BALANCED ]</span>
+      <span class="label-chip danger" style="--x: 72%; --y: 10%; --tx: -54px; --ty: 52px; --s: 0.96; --delay: -5s; --duration: 21s;">[ SUSPICIOUS ]</span>
+      <span class="label-chip far" style="--x: 91%; --y: 16%; --tx: -82px; --ty: 48px; --s: 0.74; --delay: -11s; --duration: 27s;">[ LOW ENERGY ]</span>
+      <span class="label-chip mild" style="--x: 14%; --y: 28%; --tx: 68px; --ty: 24px; --s: 0.92; --delay: -4s; --duration: 20s;">[ HESITANT ]</span>
+      <span class="label-chip near" style="--x: 84%; --y: 31%; --tx: -74px; --ty: 12px; --s: 1.1; --delay: -13s; --duration: 19s;">[ TRACKED BODY ]</span>
+      <span class="label-chip far" style="--x: 4%; --y: 44%; --tx: 86px; --ty: 0px; --s: 0.78; --delay: -17s; --duration: 26s;">[ ACTIVE ]</span>
+      <span class="label-chip danger" style="--x: 94%; --y: 45%; --tx: -92px; --ty: 0px; --s: 1; --delay: -3s; --duration: 20s;">[ LOW VALUE ]</span>
+      <span class="label-chip mild" style="--x: 18%; --y: 58%; --tx: 60px; --ty: -24px; --s: 0.88; --delay: -9s; --duration: 22s;">[ UNCERTAIN ]</span>
+      <span class="label-chip near" style="--x: 78%; --y: 61%; --tx: -58px; --ty: -34px; --s: 0.94; --delay: -15s; --duration: 18s;">[ CLASSIFIED PERSON ]</span>
+      <span class="label-chip danger" style="--x: 7%; --y: 73%; --tx: 78px; --ty: -58px; --s: 0.98; --delay: -7s; --duration: 23s;">[ FAILED HUMAN ]</span>
+      <span class="label-chip far" style="--x: 32%; --y: 86%; --tx: 34px; --ty: -76px; --s: 0.76; --delay: -12s; --duration: 28s;">[ NORMAL ]</span>
+      <span class="label-chip mild" style="--x: 64%; --y: 88%; --tx: -38px; --ty: -82px; --s: 0.84; --delay: -6s; --duration: 25s;">[ DISTRACTED ]</span>
+      <span class="label-chip danger" style="--x: 91%; --y: 78%; --tx: -84px; --ty: -56px; --s: 0.9; --delay: -19s; --duration: 24s;">[ DEFECTIVE ]</span>
+      <span class="label-chip far" style="--x: 48%; --y: 6%; --tx: 0px; --ty: 68px; --s: 0.7; --delay: -16s; --duration: 30s;">[ FACE DATA ]</span>
+      <span class="label-chip near" style="--x: 50%; --y: 94%; --tx: 0px; --ty: -92px; --s: 0.86; --delay: -10s; --duration: 26s;">[ DATA COLLECTED ]</span>
+      <span class="label-chip mild" style="--x: 3%; --y: 86%; --tx: 112px; --ty: -72px; --s: 0.72; --delay: -20s; --duration: 29s;">[ PASSIVE ]</span>
+      <span class="label-chip danger" style="--x: 97%; --y: 6%; --tx: -120px; --ty: 86px; --s: 0.82; --delay: -14s; --duration: 27s;">[ HOSTILE ]</span>
+    </div>
+    <div class="entry-grid">
+      <section class="entry-copy">
+        <p class="entry-kicker"><span></span>Interactive AI Experience</p>
+        <h2>Who are you<br>without <span>labels?</span></h2>
+        <p class="entry-subtitle">被识别，不等于被理解</p>
+        <p class="entry-description">
+          An interactive AI system that observes, classifies, and gradually misdefines the human body.
+        </p>
+        <p class="entry-description cn">
+          这是一个关于 AI 观察、分类、误判与标签化人的交互体验。
+        </p>
+        <div class="entry-actions">
+          <button id="start-experience" class="entry-button primary" type="button">Start Experience</button>
+          <button id="view-report" class="entry-button secondary" type="button">View Report</button>
         </div>
-        
-        <div class="button-group">
-            <button id="start">启动摄像头</button>
-            <button id="stop">停止摄像头</button>
+        <p id="entry-notice" class="entry-notice" aria-live="polite"></p>
+      </section>
+
+      <section class="entry-visual" aria-label="AI scanning human silhouette">
+        <div class="scan-frame">
+          <div class="scan-line"></div>
+          <div class="data-ring outer"></div>
+          <div class="data-ring inner"></div>
+          <div class="digital-figure">
+            <span class="figure-core"></span>
+            <span class="figure-head"></span>
+            <span class="figure-torso"></span>
+            <span class="figure-arm left"></span>
+            <span class="figure-arm right"></span>
+            <span class="figure-leg left"></span>
+            <span class="figure-leg right"></span>
+            <span class="figure-fragment fragment-1"></span>
+            <span class="figure-fragment fragment-2"></span>
+            <span class="figure-fragment fragment-3"></span>
+          </div>
+          <span class="pose-dot dot-1"></span>
+          <span class="pose-dot dot-2"></span>
+          <span class="pose-dot dot-3"></span>
+          <span class="pose-dot dot-4"></span>
+          <span class="pose-dot dot-5"></span>
+          <span class="pose-dot dot-6"></span>
+          <span class="entry-tag normal tag-1">Male</span>
+          <span class="entry-tag normal tag-2">Young</span>
+          <span class="entry-tag normal tag-3">Tall</span>
+          <span class="entry-tag normal tag-7">Active</span>
+          <span class="entry-tag normal tag-8">Normal</span>
+          <span class="entry-tag error tag-4">Unstable</span>
+          <span class="entry-tag error tag-5">Abnormal</span>
+          <span class="entry-tag error tag-6">Low Value</span>
+          <span class="entry-tag error tag-9">Suspicious</span>
+          <span class="entry-tag error tag-10">Useless</span>
+          <p class="live-caption"><span></span>LIVE RECOGNITION</p>
         </div>
-        
-        <div id="results" class="results-container">
-            <div id="resultDiv"></div>
+      </section>
+
+      <aside class="entry-systems">
+        <div class="entry-panel status">
+          <h3>SYSTEM STATUS</h3>
+          <p><span>AI Model</span><strong>v3.2.1</strong></p>
+          <p><span>Sensors</span><strong>8 Active</strong></p>
+          <p><span>Processing</span><strong>Real-time</strong></p>
+          <small><span></span>Online</small>
         </div>
+        <div class="entry-panel accuracy">
+          <h3>RECOGNITION ACCURACY</h3>
+          <div class="accuracy-grid">
+            <div class="accuracy-ring">64%</div>
+            <div class="mini-chart bars">
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <p><span>Overall Accuracy</span><strong>Unstable</strong></p>
+        </div>
+        <div class="entry-panel motion">
+          <h3>MOTION ANALYSIS</h3>
+          <div class="motion-grid">
+            <div class="mini-body">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div>
+              <p><span>Activity</span><strong>82%</strong></p>
+              <p><span>Stability</span><strong>48%</strong></p>
+              <p><span>Symmetry</span><strong>67%</strong></p>
+            </div>
+          </div>
+        </div>
+        <div class="entry-panel confidence">
+          <h3>CONFIDENCE OVER TIME</h3>
+          <div class="mini-chart line">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <p><span>30s</span><strong>90%</strong></p>
+        </div>
+        <div class="entry-panel stream">
+          <h3>LIVE CLASSIFICATION STREAM</h3>
+          <p><span>15:42:11</span><strong>Normal</strong><em>0.91</em></p>
+          <p><span>15:42:12</span><strong>Active</strong><em>0.88</em></p>
+          <p><span>15:42:13</span><strong>Unstable</strong><em>0.46</em></p>
+          <p><span>15:42:14</span><strong>Abnormal</strong><em>0.32</em></p>
+          <p><span>15:42:15</span><strong>Suspicious</strong><em>0.21</em></p>
+          <p><span>15:42:16</span><strong>Low Value</strong><em>0.15</em></p>
+          <p><span>15:42:17</span><strong>Useless</strong><em>0.08</em></p>
+        </div>
+      </aside>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8"></script>
-    
-    <script>
-        // 模型 URL
-        const URL = "https://teachablemachine.withgoogle.com/models/sTBoNGgmv/";
-        
-        let model, webcam, labelContainer, maxPredictions;
-        
-        // 初始化
-        async function init() {
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
-            
-            model = await tmImage.load(modelURL, metadataURL);
-            maxPredictions = model.getTotalClasses();
-            
-            const flip = true;
-            webcam = new tmImage.Webcam(500, 500, flip);
-            
-            labelContainer = document.getElementById("resultDiv");
-            labelContainer.innerHTML = "";
-            
-            for (let i = 0; i < maxPredictions; i++) {
-                const div = document.createElement("div");
-                div.className = "result-item";
-                div.innerHTML = `
-                    <span class="result-label">${model.getClassLabels()[i]}</span>
-                    <span class="result-probability" id="label-${i}">0%</span>
-                `;
-                labelContainer.appendChild(div);
-            }
-            
-            updateStatus("模型加载成功！", "ready");
-        }
-        
-        // 启动摄像头
-        document.getElementById("start").addEventListener("click", async () => {
-            await webcam.setup();
-            document.getElementById("webcam").appendChild(webcam.canvas);
-            document.getElementById("start").disabled = true;
-            updateStatus("摄像头已启动，开始检测...", "ready");
-            loop();
-        });
-        
-        // 停止摄像头
-        document.getElementById("stop").addEventListener("click", () => {
-            webcam.stop();
-            document.getElementById("webcam").innerHTML = "";
-            document.getElementById("start").disabled = false;
-            updateStatus("摄像头已停止", "ready");
-        });
-        
-        // 主循环
-        async function loop() {
-            webcam.update();
-            await predict();
-            if (document.getElementById("webcam").children.length > 0) {
-                window.requestAnimationFrame(loop);
-            }
-        }
-        
-        // 预测
-        async function predict() {
-            const prediction = await model.predict(webcam.canvas);
-            
-            for (let i = 0; i < maxPredictions; i++) {
-                const probability = (prediction[i].probability * 100).toFixed(2);
-                document.getElementById("label-" + i).innerText = probability + "%";
-            }
-        }
-        
-        // 更新状态
-        function updateStatus(message, type) {
-            const statusDiv = document.getElementById("status");
-            statusDiv.innerText = message;
-            statusDiv.className = "status " + type;
-        }
-        
-        // 页面加载时初始化
-        window.addEventListener("load", () => {
-            init().catch((error) => {
-                updateStatus("模型加载失败: " + error.message, "error");
-                console.error(error);
-            });
-        });
-    </script>
+    <div class="entry-steps">
+      <article>
+        <div class="step-copy">
+          <h3><span>01</span>Labeling</h3>
+        <p>The system observes you in real time and assigns labels based on patterns and data.</p>
+        </div>
+        <div class="step-figure stable"></div>
+      </article>
+      <article>
+        <div class="step-copy">
+          <h3><span>02</span>Misrecognition</h3>
+        <p>As time goes on, the AI's confidence shifts. Accurate labels fade, misclassification emerges.</p>
+        </div>
+        <div class="step-figure distorted"></div>
+      </article>
+      <article>
+        <div class="step-copy">
+          <h3><span>03</span>Self-Questioning</h3>
+        <p>You are invited to reflect: If the data is wrong, who defines who you are?</p>
+        </div>
+        <div class="step-figure quiet"></div>
+      </article>
+    </div>
+  </section>
+  <main id="sketch-holder" class="sketch-holder">
+    <div id="ending-controls" class="ending-controls" aria-hidden="true">
+      <button id="restart-experience" class="ending-button primary" type="button">Restart Experience</button>
+      <button id="back-home" class="ending-button secondary" type="button">Back to Home</button>
+    </div>
+  </main>
 </body>
 </html>
